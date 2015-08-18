@@ -36,17 +36,24 @@ curl -H "Authorization: \`cf oauth-token|grep bearer\`" http://applauncher-helpe
 Development
 ===========
 
-To locally develop this application you'll need `godep` tool to manage dependencies and build the project:
+To locally develop this application you'll need `godep` tool to manage dependencies and build the project. You will also need to have `gccgo-go` installed, as well as Go workspace created and GOPATH environment variable exported. If you don't meet these prerequisites, please refer to Development Environment Setup instructions in the project [Wiki] (https://github.com/trustedanalytics/project-wiki) for further instructions.
+
+Clone app-launcher-helper using `gccgo-go`:
+```
+$ go get github.com/trustedanalytics/app-launcher-helper
+``` 
+
+Navigate to the project directory:
+```
+cd $GOPATH/src/github.com/trustedanalytics/app-launcher-helper
+``` 
+
+Build and test app-launcher-helper using `godep`:
 
 ```
 $ godep go build
 $ godep go test ./...
 ```
-
-This might not work if you clone the project outside of GOPATH directory, because of absolute subpackages imports. Recommended way of cloning the project is:
-```
-$ go get github.com/trustedanalytics/app-launcher-helper
-``` 
 
 
 Deployment
