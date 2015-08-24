@@ -17,13 +17,58 @@ package service
 
 import (
 	"testing"
-
 	. "github.com/onsi/gomega"
 )
+
+type MockCloudController struct {
+
+}
+
+func (m *MockCloudController) ServicePlans(Name string) (*ResourceList, error) {
+	if Name == "atk_plans_url" {
+		servicePlans := &ResourceList{1, []Resource{Resource{ResourceMetadata{"atk_plan_guid", "atk_plan_url"}, ResourceEntity{"", ""}}}}
+		return servicePlans, nil
+	}
+	otherPlans := &ResourceList{1, []Resource{Resource{ResourceMetadata{"other_plan_guid", "other_plan_url"}, ResourceEntity{"", ""}}}}
+	return otherPlans, nil
+}
+
+func (m *MockCloudController) Services() (*ResourceList, error) {
+	services := &ResourceList{1, []Resource{Resource{ResourceMetadata{"atk_guid","atk_url"}, ResourceEntity{"atk","atk_plans_url"}}}}
+	// method not called in test
+	return services, nil
+}
+
+func (m *MockCloudController ) Spaces(organization string) (*ResourceList, error) {
+	var services *ResourceList
+	// method not called in test
+	return services, nil
+}
+
+func (m *MockCloudController ) SpaceSummary(space string) (*SpaceSummary, error) {
+	var summary * SpaceSummary
+	// method not called in test
+	return summary, nil
+}
 
 func TestUuidToAppName(t *testing.T) {
 	RegisterTestingT(t)
 
 	app := UuidToAppName("7e587e45-08a6-46d5-a412-52d5eb897299","atk")
 	Expect(app).To(Equal("atk-7e587e45-08a6-46d5-a412"))
+}
+
+func TestGetServicePlanId(t *testing.T) {
+	RegisterTestingT(t)
+	cc := new(MockCloudController)
+
+	ssh := NewSpaceSummaryHelper()
+	srv := NewAtkListService(cc, ssh)
+
+	atkPlan, err := srv.servicePlanId("atk")
+	Expect(atkPlan).To(Equal("atk_plan_guid"));
+
+	sePlan, err := srv.servicePlanId("se")
+	Expect(sePlan).To(Equal(""));
+	Expect(err).NotTo(Equal(nil));
 }

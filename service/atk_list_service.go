@@ -24,25 +24,25 @@ import (
 )
 
 type AtkInstance struct {
-	Name  string `json:"name"`
-	Url   string `json:"url"`
-	Guid  string `json:"guid"`
+	Name        string `json:"name"`
+	Url         string `json:"url"`
+	Guid        string `json:"guid"`
 	ServiceGuid string `json:"service_guid"`
-	State string `json:"state"`
+	State       string `json:"state"`
 	SeInstance *AtkInstance `json:"scoring_engine"`
 }
 
 
 type AtkInstances struct {
-	Instances       []AtkInstance `json:"instances"`
-	ServicePlanGuid string        `json:"service_plan_guid"`
+	Instances         []AtkInstance `json:"instances"`
+	ServicePlanGuid   string        `json:"service_plan_guid"`
 	SeServicePlanGuid string      `json:"se_service_plan_guid"`
 }
 
 type ByName []AtkInstance
 
-func (a ByName) Len() int           { return len(a) }
-func (a ByName) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByName) Len() int { return len(a) }
+func (a ByName) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 func (a ByName) Less(i, j int) bool { return a[i].Name < a[j].Name }
 
 func (a *AtkInstances) Append(another *AtkInstances) {
@@ -64,7 +64,7 @@ func UuidToAppName(uuid string, label string) string {
 
 type AtkListService struct {
 	SpaceSummaryHelper SpaceSummaryHelper
-	cloudController CloudController
+	cloudController    CloudController
 	logger          *gosteno.Logger
 }
 
@@ -85,10 +85,10 @@ func (p *AtkListService) getSpaceList(orgId string) ([]string, error) {
 	return spaces.IdList(), nil
 }
 
-func (p *AtkListService) ServicePlanId(Name string) (string, error) {
+func (p *AtkListService) servicePlanId(Name string) (string, error) {
 	services, err := p.cloudController.Services()
 	if err != nil {
-		return "error", err
+		return "", err
 	}
 	var servicePlansUrl string
 
@@ -98,38 +98,60 @@ func (p *AtkListService) ServicePlanId(Name string) (string, error) {
 		}
 	}
 
+	if len(servicePlansUrl) == 0 {
+		return "", errors.New("Service plans url is empty")
+	}
+
 	servicePlans, err := p.cloudController.ServicePlans(servicePlansUrl)
 	if err != nil {
-		return "error", err
+		return "", err
 	}
 
 	if len(servicePlans.Resources) == 0 {
-		return "error", errors.New("Could not find any service plan")
+		return "", errors.New("Could not find any service plan for: "+ Name)
 	}
 
 	return servicePlans.Resources[0].Metadata.Id, nil
 }
 
 func (p *AtkListService) getSpaceInstances(atkLabel string,
-		seLabel string,
-	    serviceSearchString string,
-		space string,
-	    instanceChan chan AtkInstances,
-		errorChan chan error) {
+	seLabel string,
+	serviceSearchString string,
+	space string,
+	instanceChan chan AtkInstances,
+	errorChan chan error) {
 	summary, err := p.cloudController.SpaceSummary(space)
+
 	if err != nil {
 		errorChan <- err
+		return
+	}
+	atkInstanceList := p.getInstancesFromSpaceSummary(atkLabel, seLabel, serviceSearchString, summary);
+
+	atkPlan, err := p.servicePlanId(atkLabel)
+
+	if err != nil {
+		p.logger.Warn("Failed to fetch service plan for label: " + atkLabel)
 	}
 
+	sePlan, err := p.servicePlanId(seLabel)
+	if err != nil {
+		p.logger.Warn("Failed to fetch service plan for label: " + seLabel)
+	}
+
+	instanceChan <-AtkInstances{atkInstanceList, atkPlan, sePlan}
+}
+
+func (p *AtkListService) getInstancesFromSpaceSummary(atkLabel string,
+	seLabel string,
+	serviceSearchString string,
+	summary *SpaceSummary) []AtkInstance {
 	apps := make(map[string]Application)
 	for _, a := range summary.Apps {
 		apps[a.Name] = a
 	}
 
-	p.logger.Info("Servicesearch string : " + serviceSearchString )
-
-	atkServicePlanGuid := p.getServicePlan(atkLabel, errorChan)
-	seServicePlanGuid := p.getServicePlan(seLabel, errorChan)
+	p.logger.Info("Service search string : " + serviceSearchString)
 
 	seMap := p.SpaceSummaryHelper.getMapOfAppsByService(seLabel, serviceSearchString, summary, apps)
 	atkMap := p.SpaceSummaryHelper.getMapOfAppsByService(atkLabel, serviceSearchString, summary, apps)
@@ -138,25 +160,16 @@ func (p *AtkListService) getSpaceInstances(atkLabel string,
 
 	j := 0
 	for commonService, atk := range atkMap {
-		se :=  seMap[commonService]
+		se := seMap[commonService]
 		atk.SeInstance = &se
 		instances[j] = atk
 		j++
 	}
-
-	instanceChan <- AtkInstances{instances[:j], atkServicePlanGuid, seServicePlanGuid}
+	return instances[:j]
 }
 
-func (p *AtkListService) getServicePlan(label string, errorChan chan error) string {
-	servicePlanGuid, err := p.ServicePlanId(label)
-	if err != nil {
-			errorChan <- err
-	}
-	p.logger.Info(label + " service plan id: " + servicePlanGuid)
-	return servicePlanGuid
-}
 
-func (p *AtkListService) GetAllInstances(atkLabel string, seLabel string, commonService string,  orgId string) (*AtkInstances, error) {
+func (p *AtkListService) GetAllInstances(atkLabel string, seLabel string, commonService string, orgId string) (*AtkInstances, error) {
 	spaceList, err := p.getSpaceList(orgId)
 	if err != nil {
 		return nil, err

@@ -43,7 +43,7 @@ func (p *SpaceSummaryHelper) getMapOfAppsByService(planLabel string, serviceSear
 		if s.ServicePlan.Service.Label == planLabel {
 			if a, ok := apps[UuidToAppName(s.Guid,planLabel)]; ok {
 				p.logger.Debug("App name: " + s.Name)
-				serviceName := p.FindRelatedService(*summary, serviceSearchString, s.Guid)
+				serviceName := p.FindRelatedService(summary, serviceSearchString, s.Guid)
 				seInstancesMap[serviceName] = AtkInstance{s.Name, a.Urls[0], a.Guid, s.Guid, a.State, nil}
 			} else {
 				p.logger.Warn("App not found for service: " + s.Guid)
@@ -53,7 +53,7 @@ func (p *SpaceSummaryHelper) getMapOfAppsByService(planLabel string, serviceSear
 	return seInstancesMap
 }
 
-func (p *SpaceSummaryHelper) FindRelatedService(summary SpaceSummary, serviceSearchString string, guid string) string {
+func (p *SpaceSummaryHelper) FindRelatedService(summary *SpaceSummary, serviceSearchString string, guid string) string {
 	var serviceName string
 	a := p.FindAppBoundToService(summary, guid)
 	for _, ss := range a.ServiceNames {
@@ -65,7 +65,7 @@ func (p *SpaceSummaryHelper) FindRelatedService(summary SpaceSummary, serviceSea
 	return serviceName
 }
 
-func (p *SpaceSummaryHelper) FindAppBoundToService(summary SpaceSummary, guid string) Application {
+func (p *SpaceSummaryHelper) FindAppBoundToService(summary *SpaceSummary, guid string) Application {
 	var app Application
 	commonPartOfId := p.getMainGuidPart(guid)
 	for _, a := range summary.Apps {
