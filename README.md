@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/trustedanalytics/app-launcher-helper.svg)](https://travis-ci.org/trustedanalytics/app-launcher-helper)
+
 App Launcher Helper
 ==================
 
