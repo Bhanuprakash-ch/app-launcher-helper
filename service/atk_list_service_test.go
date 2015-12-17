@@ -51,13 +51,6 @@ func (m *MockCloudController ) SpaceSummary(space string) (*SpaceSummary, error)
 	return summary, nil
 }
 
-func TestUuidToAppName(t *testing.T) {
-	RegisterTestingT(t)
-
-	app := UuidToAppName("7e587e45-08a6-46d5-a412-52d5eb897299","atk")
-	Expect(app).To(Equal("atk-7e587e45-08a6-46d5-a412"))
-}
-
 func TestGetServicePlanId(t *testing.T) {
 	RegisterTestingT(t)
 	cc := new(MockCloudController)

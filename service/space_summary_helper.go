@@ -41,7 +41,7 @@ func (p *SpaceSummaryHelper) getMapOfAppsByService(planLabel string, serviceSear
 	seInstancesMap := make(map[string]AtkInstance)
 	for _, s := range summary.Services {
 		if s.ServicePlan.Service.Label == planLabel {
-			if a, ok := apps[UuidToAppName(s.Guid,planLabel)]; ok {
+			if a, ok := apps[s.Name]; ok {
 				p.logger.Debug("App name: " + s.Name)
 				serviceName := p.FindRelatedService(summary, serviceSearchString, s.Guid)
 				seInstancesMap[serviceName] = AtkInstance{s.Name, a.Urls[0], a.Guid, s.Guid, a.State, nil}

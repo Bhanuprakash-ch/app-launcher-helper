@@ -18,8 +18,6 @@ package service
 import (
 	"errors"
 	"sort"
-	"strings"
-
 	"github.com/cloudfoundry/gosteno"
 )
 
@@ -56,11 +54,6 @@ func (a *AtkInstances) Append(another *AtkInstances) {
 
 func (a *AtkInstances) Sort() {
 	sort.Sort(ByName(a.Instances))}
-
-func UuidToAppName(uuid string, label string) string {
-	idx := strings.LastIndex(uuid, "-")
-	return label + "-" + uuid[:idx]
-}
 
 type AtkListService struct {
 	SpaceSummaryHelper SpaceSummaryHelper
