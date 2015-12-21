@@ -37,19 +37,19 @@ func (p *SpaceSummaryHelper) getMainGuidPart(guid string ) string {
 	return mainPart
 }
 
-func (p *SpaceSummaryHelper) getMapOfAppsByService(planLabel string, serviceSearchString string, summary *SpaceSummary, apps map[string]Application ) map[string]AtkInstance{
-	seInstancesMap := make(map[string]AtkInstance)
+func (p *SpaceSummaryHelper) getAppsByService(planLabel string, summary *SpaceSummary, apps map[string]Application) []AtkInstance{
+	instances := []AtkInstance{}
 	for _, s := range summary.Services {
 		if s.ServicePlan.Service.Label == planLabel {
 			if a, ok := apps[s.Name]; ok {
 				p.logger.Debug("App name: " + s.Name)
-				seInstancesMap[s.Name] = AtkInstance{s.Name, a.Urls[0], a.Guid, s.Guid, a.State, nil}
+				instances = append(instances, AtkInstance{s.Name, a.Urls[0], a.Guid, s.Guid, a.State, nil})
 			} else {
 				p.logger.Warn("App not found for service: " + s.Guid)
 			}
 		}
 	}
-	return seInstancesMap
+	return instances
 }
 
 

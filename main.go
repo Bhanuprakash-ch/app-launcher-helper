@@ -64,17 +64,7 @@ func main() {
 		spaceSummaryHelper := service.NewSpaceSummaryHelper()
 
 		srv := service.NewAtkListService(cloudController, spaceSummaryHelper)
-
-		if (len(conf.CommonService) == 0) {
-			conf.CommonService = "postgres"
-		}
-
-		//TODO: check id param
-
-		instances, err := srv.GetAllInstances(conf.ServiceLabel,
-			                                  conf.ScoringEngineLabel,
-			                                  conf.CommonService,
-									params["id"])
+		instances, err := srv.GetAllInstances(conf.ServiceLabel, params["id"])
 		if err != nil {
 			r.JSON(500, err.Error())
 		}

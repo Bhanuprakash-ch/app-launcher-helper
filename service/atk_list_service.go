@@ -34,7 +34,6 @@ type AtkInstance struct {
 type AtkInstances struct {
 	Instances         []AtkInstance `json:"instances"`
 	ServicePlanGuid   string        `json:"service_plan_guid"`
-	SeServicePlanGuid string      `json:"se_service_plan_guid"`
 }
 
 type ByName []AtkInstance
@@ -46,7 +45,6 @@ func (a ByName) Less(i, j int) bool { return a[i].Name < a[j].Name }
 func (a *AtkInstances) Append(another *AtkInstances) {
 	if another.ServicePlanGuid != "" {
 		a.ServicePlanGuid = another.ServicePlanGuid
-		a.SeServicePlanGuid = another.SeServicePlanGuid
 	}
 
 	a.Instances = append(a.Instances, another.Instances...)
@@ -108,8 +106,6 @@ func (p *AtkListService) servicePlanId(Name string) (string, error) {
 }
 
 func (p *AtkListService) getSpaceInstances(atkLabel string,
-	seLabel string,
-	serviceSearchString string,
 	space string,
 	instanceChan chan AtkInstances,
 	errorChan chan error) {
@@ -119,7 +115,7 @@ func (p *AtkListService) getSpaceInstances(atkLabel string,
 		errorChan <- err
 		return
 	}
-	atkInstanceList := p.getInstancesFromSpaceSummary(atkLabel, seLabel, serviceSearchString, summary);
+	atkInstanceList := p.getInstancesFromSpaceSummary(atkLabel, summary);
 
 	atkPlan, err := p.servicePlanId(atkLabel)
 
@@ -127,42 +123,22 @@ func (p *AtkListService) getSpaceInstances(atkLabel string,
 		p.logger.Warn("Failed to fetch service plan for label: " + atkLabel)
 	}
 
-	sePlan, err := p.servicePlanId(seLabel)
-	if err != nil {
-		p.logger.Warn("Failed to fetch service plan for label: " + seLabel)
-	}
-
-	instanceChan <-AtkInstances{atkInstanceList, atkPlan, sePlan}
+	instanceChan <-AtkInstances{atkInstanceList, atkPlan}
 }
 
 func (p *AtkListService) getInstancesFromSpaceSummary(atkLabel string,
-	seLabel string,
-	serviceSearchString string,
 	summary *SpaceSummary) []AtkInstance {
 	apps := make(map[string]Application)
 	for _, a := range summary.Apps {
 		apps[a.Name] = a
 	}
 
-	p.logger.Info("Service search string : " + serviceSearchString)
-
-	seMap := p.SpaceSummaryHelper.getMapOfAppsByService(seLabel, serviceSearchString, summary, apps)
-	atkMap := p.SpaceSummaryHelper.getMapOfAppsByService(atkLabel, serviceSearchString, summary, apps)
-
-	instances := make([]AtkInstance, len(summary.Services))
-
-	j := 0
-	for commonService, atk := range atkMap {
-		se := seMap[commonService]
-		atk.SeInstance = &se
-		instances[j] = atk
-		j++
-	}
-	return instances[:j]
+	instances := p.SpaceSummaryHelper.getAppsByService(atkLabel, summary, apps)
+	return instances
 }
 
 
-func (p *AtkListService) GetAllInstances(atkLabel string, seLabel string, commonService string, orgId string) (*AtkInstances, error) {
+func (p *AtkListService) GetAllInstances(atkLabel string, orgId string) (*AtkInstances, error) {
 	spaceList, err := p.getSpaceList(orgId)
 	if err != nil {
 		return nil, err
@@ -172,7 +148,7 @@ func (p *AtkListService) GetAllInstances(atkLabel string, seLabel string, common
 	errorChan := make(chan error)
 
 	for _, s := range spaceList {
-		go p.getSpaceInstances(atkLabel, seLabel, commonService, s, instanceChan, errorChan)
+		go p.getSpaceInstances(atkLabel, s, instanceChan, errorChan)
 	}
 
 	atkInstances := AtkInstances{}

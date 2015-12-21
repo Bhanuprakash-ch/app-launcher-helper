@@ -3,12 +3,12 @@
 App Launcher Helper
 ==================
 
-App Launcher Helper is a service that provides a list of services created by a specific instance of [App Launching Service Broker](https://github.com/trustedanalytics/app-launching-service-broker).
+App Launcher Helper is a service that provides a list of services created by a specific instance of [Application Broker](https://github.com/trustedanalytics/application-broker).
 
 Usage
 =====
 
-The problem with App Launching SB is that there's no direct connection between a service and a related application - they're bound by naming convention only. App Launcher Helper is trying to fill this gap by providing a list of entries on a REST call:
+The problem with Cloud Foundry and Application Broker is that there's no direct connection between a service and a related application for now. They're bound by naming convention only. App Launcher Helper is trying to fill this gap by providing a list of entries on a REST call:
 
 ```
 http://hostname/rest/orgs/:orgId/atkinstances
@@ -66,7 +66,6 @@ Before pushing the app to the Cloud Foundry, there're three env variables to be 
 * `TOKEN_KEY_URL` - an address of a key, to validate user's access token;
 * `API_URL` - Cloud Foundry API address;
 * `SERVICE_NAME` - a service name provided by App Launching Service Broker;
-* `SE_SERVICE_NAME` - a Scoring Engine service name.
 
 They are defined in manifest.yml, but they can be set by a `cf set-env` command as well.
 When environment is ready, there's only one command needed:

@@ -21,8 +21,6 @@ type Config struct {
 	TokenKeyUrl                     string `envconfig:"TOKEN_KEY_URL"`
 	ApiUrl                          string `envconfig:"API_URL"`
 	ServiceLabel                    string `envconfig:"SERVICE_NAME"`
-        ScoringEngineLabel              string `envconfig:"SE_SERVICE_NAME"`
-        CommonService                   string `envconfig:"COMMON_SERVICE"`
 }
 
 func NewConfig() *Config {

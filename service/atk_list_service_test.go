@@ -61,7 +61,7 @@ func TestGetServicePlanId(t *testing.T) {
 	atkPlan, err := srv.servicePlanId("atk")
 	Expect(atkPlan).To(Equal("atk_plan_guid"));
 
-	sePlan, err := srv.servicePlanId("se")
+	sePlan, err := srv.servicePlanId("another")
 	Expect(sePlan).To(Equal(""));
 	Expect(err).NotTo(Equal(nil));
 }
