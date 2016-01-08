@@ -39,10 +39,23 @@ func (p *SpaceSummaryHelper) getMainGuidPart(guid string ) string {
 
 func (p *SpaceSummaryHelper) getAppsByService(planLabel string, summary *SpaceSummary, apps map[string]Application) []AtkInstance{
 	instances := []AtkInstance{}
+
 	for _, s := range summary.Services {
 		if s.ServicePlan.Service.Label == planLabel {
-			if a, ok := apps[s.Name]; ok {
-				p.logger.Debug("App name: " + s.Name)
+			serviceGuidSuffix := "-" + s.Guid[0:8]
+
+			// Please note that the "if" statements below have side effects. They assign a value to a variable from a map,
+			// but using different key. Be careful with possible "optimizations".
+			if a, ok := apps[s.Name + serviceGuidSuffix]; ok {
+				p.logger.Debug("App name (matched service name): " + s.Name)
+
+				// Information about ATK Instance contains the service name (the name user entered in UI or CLI)
+				// and the application URL. This is what makes sense to be presented to the users.
+				instances = append(instances, AtkInstance{s.Name, a.Urls[0], a.Guid, s.Guid, a.State, nil})
+			} else if a, ok := apps[planLabel + serviceGuidSuffix]; ok {
+				p.logger.Debug("App name (matched service plan): " + s.Name)
+
+				// See the above comment.
 				instances = append(instances, AtkInstance{s.Name, a.Urls[0], a.Guid, s.Guid, a.State, nil})
 			} else {
 				p.logger.Warn("App not found for service: " + s.Guid)
@@ -51,5 +64,3 @@ func (p *SpaceSummaryHelper) getAppsByService(planLabel string, summary *SpaceSu
 	}
 	return instances
 }
-
-
