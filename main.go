@@ -28,6 +28,14 @@ import (
 	"github.com/martini-contrib/render"
 )
 
+// swagger:route GET /rest/orgs/:id/atkinstances GetAllInstances
+//
+//
+// Returns the list of services created by application-broker
+//
+//     Responses:
+//       200: AtkListService
+//       500: Error
 func main() {
 	c := &gosteno.Config{
 		Sinks: []gosteno.Sink{
@@ -52,6 +60,7 @@ func main() {
 	}
 
 	m.Handlers(
+		martini.Static("public"),
 		atkoauth2.ResourceServer(key),
 		martini.Logger(),
 		render.Renderer(render.Options{IndentJSON: true}),
@@ -71,6 +80,9 @@ func main() {
 
 		r.JSON(200, instances)
 	})
+
+
+
 
 	m.Run()
 }
