@@ -16,8 +16,6 @@
 package cc
 
 import (
-	"encoding/json"
-	"errors"
 	"net/http"
 
 	"github.com/cloudfoundry/gosteno"
@@ -25,15 +23,8 @@ import (
 	"github.com/trustedanalytics/app-launcher-helper/service"
 )
 
-type RestCloudController struct {
-	client      *http.Client
-	apiUrl      string
-	accessToken string
-	logger      *gosteno.Logger
-}
-
 func NewRestCloudController(apiUrl string, accessToken string) service.CloudController {
-	return &RestCloudController{
+	return &RestController{
 		client:      &http.Client{},
 		apiUrl:      apiUrl,
 		accessToken: accessToken,
@@ -41,45 +32,22 @@ func NewRestCloudController(apiUrl string, accessToken string) service.CloudCont
 	}
 }
 
-func (c *RestCloudController) Spaces(organization string) (*service.ResourceList, error) {
+func (rc *RestController) Spaces(organization string) (*service.ResourceList, error) {
 	var resList service.ResourceList
-	return &resList, c.doGet("/v2/organizations/"+organization+"/spaces", &resList)
+	return &resList, rc.doGet("/v2/organizations/"+organization+"/spaces", &resList)
 }
 
-func (c *RestCloudController) SpaceSummary(space string) (*service.SpaceSummary, error) {
+func (rc *RestController) SpaceSummary(space string) (*service.SpaceSummary, error) {
 	var summary service.SpaceSummary
-	return &summary, c.doGet("/v2/spaces/"+space+"/summary", &summary)
+	return &summary, rc.doGet("/v2/spaces/"+space+"/summary", &summary)
 }
 
-func (c *RestCloudController) Services() (*service.ResourceList, error) {
+func (rc *RestController) Services() (*service.ResourceList, error) {
 	var services service.ResourceList
-	return &services, c.doGet("/v2/services", &services)
+	return &services, rc.doGet("/v2/services", &services)
 }
 
-func (c *RestCloudController) ServicePlans(servicePlansUrl string) (*service.ResourceList, error) {
+func (rc *RestController) ServicePlans(servicePlansUrl string) (*service.ResourceList, error) {
 	var services service.ResourceList
-	return &services, c.doGet(servicePlansUrl, &services)
-}
-
-func (c *RestCloudController) doGet(path string, target interface{}) error {
-	c.logger.Debug("GET " + path)
-	req, err := http.NewRequest("GET", c.apiUrl+path, nil)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("Authorization", "bearer "+c.accessToken)
-
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return errors.New(resp.Status)
-	}
-
-	dec := json.NewDecoder(resp.Body)
-
-	return dec.Decode(&target)
+	return &services, rc.doGet(servicePlansUrl, &services)
 }

@@ -27,6 +27,7 @@ type AtkInstance struct {
 	Guid        string `json:"guid"`
 	ServiceGuid string `json:"service_guid"`
 	State       string `json:"state"`
+	Metadata	*InstanceMetadata `json:"metadata"`
 	SeInstance *AtkInstance `json:"scoring_engine"`
 }
 
@@ -34,6 +35,11 @@ type AtkInstance struct {
 type AtkInstances struct {
 	Instances         []AtkInstance `json:"instances"`
 	ServicePlanGuid   string        `json:"service_plan_guid"`
+}
+
+type InstanceMetadata struct {
+	CreatorGuid string `json:"creator_guid"`
+	CreatorName string `json:"creator_name"`
 }
 
 type ByName []AtkInstance
@@ -56,14 +62,16 @@ func (a *AtkInstances) Sort() {
 type AtkListService struct {
 	SpaceSummaryHelper SpaceSummaryHelper
 	cloudController    CloudController
+	serviceCatalog	   ServiceCatalog
 	logger          *gosteno.Logger
 }
 
-func NewAtkListService(cloudController CloudController, SpaceSummaryHelper SpaceSummaryHelper) *AtkListService {
+func NewAtkListService(cloudController CloudController, serviceCatalog ServiceCatalog, SpaceSummaryHelper SpaceSummaryHelper) *AtkListService {
 	return &AtkListService{
-		cloudController: cloudController,
+		cloudController: 	cloudController,
+		serviceCatalog: 	serviceCatalog,
 		SpaceSummaryHelper: SpaceSummaryHelper,
-		logger:          gosteno.NewLogger("atk_list_service"),
+		logger:          	gosteno.NewLogger("atk_list_service"),
 	}
 }
 
@@ -109,7 +117,7 @@ func (p *AtkListService) getSpaceInstances(atkLabel string,
 	space string,
 	instanceChan chan AtkInstances,
 	errorChan chan error) {
-	summary, err := p.cloudController.SpaceSummary(space)
+	summary, err := p.serviceCatalog.ExtendedSummary(space)
 
 	if err != nil {
 		errorChan <- err
@@ -127,7 +135,7 @@ func (p *AtkListService) getSpaceInstances(atkLabel string,
 }
 
 func (p *AtkListService) getInstancesFromSpaceSummary(atkLabel string,
-	summary *SpaceSummary) []AtkInstance {
+	summary *ExtendedSpaceSummary) []AtkInstance {
 	apps := make(map[string]Application)
 	for _, a := range summary.Apps {
 		apps[a.Name] = a

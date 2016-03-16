@@ -15,17 +15,35 @@
  */
 package config
 
-import "github.com/kelseyhightower/envconfig"
+import (
+	"github.com/kelseyhightower/envconfig"
+	"github.com/trustedanalytics/app-launcher-helper/service"
+	"encoding/json"
+)
 
 type Config struct {
-	TokenKeyUrl                     string `envconfig:"TOKEN_KEY_URL"`
-	ApiUrl                          string `envconfig:"API_URL"`
-	ServiceLabel                    string `envconfig:"SERVICE_NAME"`
+	TokenKeyUrl       string `envconfig:"TOKEN_KEY_URL"`
+	ApiUrl            string `envconfig:"API_URL"`
+	ServiceLabel      string `envconfig:"SERVICE_NAME"`
+	VcapServicesRaw   string `envconfig:"VCAP_SERVICES"`
+	VcapServices      service.VcapServices
+	ServiceCatalogUrl string
 }
 
 func NewConfig() *Config {
 	var c Config
 	envconfig.Process("dashboard", &c)
-
+	SetConfigVarsFromVcapServices(&c)
 	return &c
+}
+
+func SetConfigVarsFromVcapServices(c *Config) {
+	if err := json.Unmarshal([]byte(c.VcapServicesRaw), &c.VcapServices); err != nil {
+		panic(err)
+	}
+	for _, s := range c.VcapServices.UpsisList {
+		if (s.UpsiName == "servicecatalog") {
+			c.ServiceCatalogUrl = s.UpsiCredentials.Host
+		}
+	}
 }

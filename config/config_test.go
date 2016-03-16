@@ -18,20 +18,26 @@ package config
 import (
 	"os"
 	"testing"
-
+        s "github.com/trustedanalytics/app-launcher-helper/service"
 	. "github.com/onsi/gomega"
 )
 
 func TestNewConfig(t *testing.T) {
 	RegisterTestingT(t)
 
+        vcapservices := s.VcapServices{[]s.UserProvided{s.UserProvided{UpsiCredentials: s.Credentials{Host:"serviceCatalogUrl"}, UpsiName:"servicecatalog"}}}
+
 	expected := Config{
 		ApiUrl:      "apiurl",
 		TokenKeyUrl: "tokenKeyurl",
+                VcapServicesRaw: "{\"user-provided\":[{\"credentials\":{\"host\":\"serviceCatalogUrl\"},\"name\":\"servicecatalog\"}]}",
+                VcapServices: vcapservices,
+                ServiceCatalogUrl: "serviceCatalogUrl",
 	}
 
 	os.Setenv("API_URL", expected.ApiUrl)
 	os.Setenv("TOKEN_KEY_URL", expected.TokenKeyUrl)
+        os.Setenv("VCAP_SERVICES", expected.VcapServicesRaw)
 
 	c := NewConfig()
 

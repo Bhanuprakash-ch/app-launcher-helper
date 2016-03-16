@@ -24,6 +24,10 @@ type MockCloudController struct {
 
 }
 
+type MockServiceCatalog struct {
+
+}
+
 func (m *MockCloudController) ServicePlans(Name string) (*ResourceList, error) {
 	if Name == "atk_plans_url" {
 		servicePlans := &ResourceList{1, []Resource{Resource{ResourceMetadata{"atk_plan_guid", "atk_plan_url"}, ResourceEntity{"", ""}}}}
@@ -51,12 +55,18 @@ func (m *MockCloudController ) SpaceSummary(space string) (*SpaceSummary, error)
 	return summary, nil
 }
 
+func (msc *MockServiceCatalog ) ExtendedSummary(space string) (*ExtendedSpaceSummary, error) {
+        var summary *ExtendedSpaceSummary
+        return summary, nil
+}
+
 func TestGetServicePlanId(t *testing.T) {
 	RegisterTestingT(t)
 	cc := new(MockCloudController)
+        sc := new(MockServiceCatalog)
 
 	ssh := NewSpaceSummaryHelper()
-	srv := NewAtkListService(cc, ssh)
+	srv := NewAtkListService(cc, sc, ssh)
 
 	atkPlan, err := srv.servicePlanId("atk")
 	Expect(atkPlan).To(Equal("atk_plan_guid"));

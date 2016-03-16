@@ -13,30 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package service
+package cc
 
-func (rl *ResourceList) Contains(Id string) bool {
-	for _, r := range rl.Resources {
-		if r.Metadata.Id == Id {
-			return true
-		}
+import (
+	"net/http"
+	"github.com/cloudfoundry/gosteno"
+	"github.com/trustedanalytics/app-launcher-helper/service"
+)
+
+func NewRestServiceCatalog(apiUrl string, accessToken string) service.ServiceCatalog {
+	return &RestController{
+		client:      &http.Client{},
+		apiUrl:      apiUrl,
+		accessToken: accessToken,
+		logger:      gosteno.NewLogger("service_catalog"),
 	}
-
-	return false
 }
 
-func (rl *ResourceList) IdList() []string {
-	ids := make([]string, rl.Count)
-	for i, r := range rl.Resources {
-		ids[i] = r.Metadata.Id
-	}
-
-	return ids
-}
-
-type CloudController interface {
-	Spaces(organization string) (*ResourceList, error)
-	SpaceSummary(space string) (*SpaceSummary, error)
-	Services() (*ResourceList, error)
-	ServicePlans(Name string) (*ResourceList, error)
+func (rc *RestController) ExtendedSummary(space string) (*service.ExtendedSpaceSummary, error) {
+	var summary service.ExtendedSpaceSummary
+	return &summary, rc.doGet("/rest/service_instances/extended_summary?space="+space, &summary)
 }

@@ -69,10 +69,11 @@ func main() {
 	m.Get("/rest/orgs/:id/atkinstances", func(params martini.Params, t *jwt.Token, r render.Render) {
 
 		cloudController := cc.NewRestCloudController(conf.ApiUrl, t.Raw)
+		serviceCatalog := cc.NewRestServiceCatalog(conf.ServiceCatalogUrl, t.Raw)
 
 		spaceSummaryHelper := service.NewSpaceSummaryHelper()
 
-		srv := service.NewAtkListService(cloudController, spaceSummaryHelper)
+		srv := service.NewAtkListService(cloudController, serviceCatalog, spaceSummaryHelper)
 		instances, err := srv.GetAllInstances(conf.ServiceLabel, params["id"])
 		if err != nil {
 			r.JSON(500, err.Error())

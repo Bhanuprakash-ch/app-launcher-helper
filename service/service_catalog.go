@@ -15,28 +15,6 @@
  */
 package service
 
-func (rl *ResourceList) Contains(Id string) bool {
-	for _, r := range rl.Resources {
-		if r.Metadata.Id == Id {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (rl *ResourceList) IdList() []string {
-	ids := make([]string, rl.Count)
-	for i, r := range rl.Resources {
-		ids[i] = r.Metadata.Id
-	}
-
-	return ids
-}
-
-type CloudController interface {
-	Spaces(organization string) (*ResourceList, error)
-	SpaceSummary(space string) (*SpaceSummary, error)
-	Services() (*ResourceList, error)
-	ServicePlans(Name string) (*ResourceList, error)
+type ServiceCatalog interface {
+	ExtendedSummary(space string) (*ExtendedSpaceSummary, error)
 }
