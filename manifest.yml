@@ -5,10 +5,12 @@ applications:
   instances: 1
   host: app-launcher-helper
   path: .
+  services:
+  - servicecatalog
   env:
     SERVICE_NAME: "atk"
     # DO NOT TOUCH, VERSION IS AUTOINCREMENTED BY BUMPVERSION TOOL
-    VERSION: "0.4.15"
+    VERSION: "0.4.16"
   ### These env variables need to be manually set depending on the instance of CF.
   #   this is example for <platform_domain> ###
   # TOKEN_KEY_URL: "https://uaa.run.<platform_domain>/token_key"
