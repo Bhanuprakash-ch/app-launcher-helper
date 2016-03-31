@@ -33,9 +33,12 @@ import (
 //
 // Returns the list of services created by application-broker
 //
+// Privilege level: All users authenticated to cloud foundry have access to this endpoint. Authentication is done by cloud controller.
+//
 //     Responses:
 //       200: AtkListService
 //       500: Error
+//
 func main() {
 	c := &gosteno.Config{
 		Sinks: []gosteno.Sink{
