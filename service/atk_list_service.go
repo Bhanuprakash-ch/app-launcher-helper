@@ -85,7 +85,7 @@ func (p *AtkListService) getSpaceList(orgId string) ([]string, error) {
 }
 
 func (p *AtkListService) servicePlanId(Name string) (string, error) {
-	services, err := p.cloudController.Services()
+	services, err := p.cloudController.ServicesFiltered(Name)
 	if err != nil {
 		return "", err
 	}

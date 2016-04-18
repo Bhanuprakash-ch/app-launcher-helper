@@ -47,6 +47,11 @@ func (rc *RestController) Services() (*service.ResourceList, error) {
 	return &services, rc.doGet("/v2/services", &services)
 }
 
+func (rc *RestController) ServicesFiltered(Name string) (*service.ResourceList, error) {
+	var services service.ResourceList
+	return &services, rc.doGet("/v2/services?q=label:" + Name, &services)
+}
+
 func (rc *RestController) ServicePlans(servicePlansUrl string) (*service.ResourceList, error) {
 	var services service.ResourceList
 	return &services, rc.doGet(servicePlansUrl, &services)

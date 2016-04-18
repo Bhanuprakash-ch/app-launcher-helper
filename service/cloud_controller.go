@@ -38,5 +38,6 @@ type CloudController interface {
 	Spaces(organization string) (*ResourceList, error)
 	SpaceSummary(space string) (*SpaceSummary, error)
 	Services() (*ResourceList, error)
+	ServicesFiltered(Name string) (*ResourceList, error)
 	ServicePlans(Name string) (*ResourceList, error)
 }

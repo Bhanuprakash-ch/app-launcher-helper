@@ -43,6 +43,13 @@ func (m *MockCloudController) Services() (*ResourceList, error) {
 	return services, nil
 }
 
+func (m *MockCloudController) ServicesFiltered(Name string) (*ResourceList, error) {
+	services := &ResourceList{1, []Resource{Resource{ResourceMetadata{"atk_guid","atk_url"}, ResourceEntity{"atk","atk_plans_url"}}}}
+	// method not called in test
+	return services, nil
+}
+
+
 func (m *MockCloudController ) Spaces(organization string) (*ResourceList, error) {
 	var services *ResourceList
 	// method not called in test
