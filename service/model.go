@@ -64,7 +64,7 @@ type ExtendedService struct {
 	Name        string      		`json:"name"`
 	Guid        string      		`json:"guid"`
 	ServicePlan ServicePlan 	 	`json:"service_plan"`
-	Metadata 	*InstanceMetadata	`json:"metadata"`
+	Metadata    InstanceMetadata	`json:"metadata"`
 }
 
 type ServicePlan struct {

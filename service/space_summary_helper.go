@@ -51,12 +51,12 @@ func (p *SpaceSummaryHelper) getAppsByService(planLabel string, summary *Extende
 
 				// Information about ATK Instance contains the service name (the name user entered in UI or CLI)
 				// and the application URL. This is what makes sense to be presented to the users.
-				instances = append(instances, AtkInstance{s.Name, p.getUrl(a.Urls), a.Guid, s.Guid, a.State, s.Metadata, nil})
+				instances = append(instances, AtkInstance{s.Name, p.getUrl(a.Urls), a.Guid, s.Guid, a.State, s.Metadata})
 			} else if a, ok := apps[planLabel + serviceGuidSuffix]; ok {
 				p.logger.Debug("App name (matched service plan): " + s.Name)
 
 				// See the above comment.
-				instances = append(instances, AtkInstance{s.Name, p.getUrl(a.Urls), a.Guid, s.Guid, a.State, s.Metadata, nil})
+				instances = append(instances, AtkInstance{s.Name, p.getUrl(a.Urls), a.Guid, s.Guid, a.State, s.Metadata})
 			} else {
 				p.logger.Warn("App not found for service: " + s.Guid)
 			}

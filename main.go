@@ -13,6 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// Package main app-launcher-helper API
+//
+// The purpose of this application is to display filtered list of services created by application broker.
+// Filtering is done by SERVICE_NAME environment variable. 
+// 
+//
+//     Version: 0.4.21
+//
+// swagger:meta
 package main
 
 import (
@@ -36,8 +45,8 @@ import (
 // Privilege level: All users authenticated to cloud foundry have access to this endpoint. Authentication is done by cloud controller.
 //
 //     Responses:
-//       200: AtkListService
-//       500: Error
+//       200: AtkInstancesResponse
+//       500: InternalServerError
 //
 func main() {
 	c := &gosteno.Config{
@@ -84,9 +93,6 @@ func main() {
 
 		r.JSON(200, instances)
 	})
-
-
-
 
 	m.Run()
 }

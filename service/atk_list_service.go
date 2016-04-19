@@ -27,10 +27,15 @@ type AtkInstance struct {
 	Guid        string `json:"guid"`
 	ServiceGuid string `json:"service_guid"`
 	State       string `json:"state"`
-	Metadata	*InstanceMetadata `json:"metadata"`
-	SeInstance *AtkInstance `json:"scoring_engine"`
+	Metadata    InstanceMetadata `json:"metadata"`
 }
 
+// AtkInstances
+// swagger:response AtkInstancesResponse
+type AtkInstancesResponse struct {
+	// in: body
+	Body AtkInstances
+}
 
 type AtkInstances struct {
 	Instances         []AtkInstance `json:"instances"`
