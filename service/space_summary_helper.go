@@ -41,11 +41,13 @@ func (p *SpaceSummaryHelper) getAppsByService(planLabel string, summary *Extende
 	instances := []AtkInstance{}
 
 	for _, s := range summary.Services {
+		s.Name = replaceSpacesByDashes(s.Name)
 		if s.ServicePlan.Service.Label == planLabel {
 			serviceGuidSuffix := "-" + s.Guid[0:8]
 
 			// Please note that the "if" statements below have side effects. They assign a value to a variable from a map,
 			// but using different key. Be careful with possible "optimizations".
+			p.logger.Debug("Searching for app" + s.Name + serviceGuidSuffix)
 			if a, ok := apps[s.Name + serviceGuidSuffix]; ok {
 				p.logger.Debug("App name (matched service name): " + s.Name)
 
@@ -58,7 +60,7 @@ func (p *SpaceSummaryHelper) getAppsByService(planLabel string, summary *Extende
 				// See the above comment.
 				instances = append(instances, AtkInstance{s.Name, p.getUrl(a.Urls), a.Guid, s.Guid, a.State, s.Metadata})
 			} else {
-				p.logger.Warn("App not found for service: " + s.Guid)
+				p.logger.Warn("App not found for service: " + s.Name)
 			}
 		}
 	}
@@ -70,4 +72,8 @@ func (p* SpaceSummaryHelper) getUrl(urls []string) string {
 		return urls[0]
 	}
 	return "";
+}
+
+func replaceSpacesByDashes(name string) (string) {
+	return strings.Replace(name, " ", "-", -1)
 }
